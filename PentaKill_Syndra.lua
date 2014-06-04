@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 0.1
+local version = 0.11
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -581,20 +581,21 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 			end
 		end
 	end
-
-	if (((Qtarget and not Menu.R.Targets[Qtarget.hash]) or (Rtarget and not Menu.R.Targets[Rtarget.hash])) or (os.clock() - UseRTime < 10)) and UseR then
-		if Qtarget and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Qtarget, GetCombo(Qtarget)) and not DLib:IsKillable(Qtarget, {_Q, _E, _W}) then
-			ItemManager:CastOffensiveItems(Qtarget)
-			if _IGNITE and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < 600 * 600 then
-				CastSpell(_IGNITE, Qtarget)
+	if not Q.IsReady() and not W.IsReady() then
+		if (((Qtarget and not Menu.R.Targets[Qtarget.hash]) or (Rtarget and not Menu.R.Targets[Rtarget.hash])) or (os.clock() - UseRTime < 10)) and UseR then
+			if Qtarget and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Qtarget, GetCombo(Qtarget)) and not DLib:IsKillable(Qtarget, {_Q, _E, _W}) then
+				ItemManager:CastOffensiveItems(Qtarget)
+				if _IGNITE and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < 600 * 600 then
+					CastSpell(_IGNITE, Qtarget)
+				end
+				CastSpell(_R, Qtarget)
+			elseif Rtarget and GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Rtarget, GetCombo(Rtarget)) and not DLib:IsKillable(Rtarget, {_Q, _E, _W}) then
+				ItemManager:CastOffensiveItems(Rtarget)
+				if _IGNITE and GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < 600 * 600 then
+					CastSpell(_IGNITE, Rtarget)
+				end
+				CastSpell(_R, Rtarget)
 			end
-			CastSpell(_R, Qtarget)
-		elseif Rtarget and GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Rtarget, GetCombo(Rtarget)) and not DLib:IsKillable(Rtarget, {_Q, _E, _W}) then
-			ItemManager:CastOffensiveItems(Rtarget)
-			if _IGNITE and GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < 600 * 600 then
-				CastSpell(_IGNITE, Rtarget)
-			end
-			CastSpell(_R, Rtarget)
 		end
 	end
 end
