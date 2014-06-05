@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 0.21
+local version = 0.22
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -81,10 +81,9 @@ function OnLoad()
 	end
 
 
-         if not (Prodiction.GetPrediction == nil) then
-         	Menu:addSubMenu("Choose Prediction Type", "SelectPred")
-         	Menu.SelectPred:addParam("predictionType", "Prediction Type", SCRIPT_PARAM_LIST, 2, { "VPrediction", "Prodiction" })
-         end
+         
+         Menu:addSubMenu("Choose Prediction Type", "SelectPred")
+         Menu.SelectPred:addParam("predictionType", "Prediction Type", SCRIPT_PARAM_LIST, 2, { "VPrediction", "Prodiction" })
 
 
 
@@ -674,6 +673,9 @@ function Harass()
 end
 
 function OnTick()
+	if Prodiction.GetPrediction == nil then
+		Menu.SelectPred.predictionType = 1
+	end
 	DLib.combo = GetCombo()
 	DrawJungleStealingIndicator = false
 	BTOnTick()
