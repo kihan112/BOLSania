@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 0.2
+local version = 0.21
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -674,9 +674,6 @@ function Harass()
 end
 
 function OnTick()
-	if Prodiction.GetPrediction == nil then
-		Menu.SelectPred.predictionType = 1
-	end
 	DLib.combo = GetCombo()
 	DrawJungleStealingIndicator = false
 	BTOnTick()
