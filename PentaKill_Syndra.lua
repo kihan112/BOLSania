@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 0.24
+local version = 0.25
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -504,7 +504,7 @@ function Cast2Q(target)
 		else
 			QEtargetPos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Menu.EQ.Range / QE.speed), QE.width)
 		end
-		if QEtargetPos then 
+		if QEtargetPos and QEtargetPos.z then 
 			local pos = Vector(myHero.visionPos) + Menu.EQ.Range * (Vector(QEtargetPos) - Vector(myHero.visionPos)):normalized()
 			CastSpell(_Q, pos.x, pos.z)
 		end
@@ -517,7 +517,7 @@ function Cast2Q(target)
 			else
 				QEtargetPos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Qdistance / QE.speed), QE.width)
 			end
-			if QEtargetPos then 
+			if QEtargetPos and QEtargetPos.z then 
 				local pos = Vector(myHero.visionPos) + Qdistance * (Vector(QEtargetPos) - Vector(myHero.visionPos)):normalized()
 				CastSpell(_Q, pos.x, pos.z)
 			end
@@ -530,7 +530,7 @@ function Cast2Q(target)
 			else
 				pos, info = Prodiction.GetPrediction(target, Q.range, Q.speed, Q.delay, Q.width)
 			end
-			if pos then
+			if pos and pos.z then
 				CastSpell(_Q, pos.x, pos.z)
 			end
 		end
@@ -571,7 +571,7 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 					pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
 				end
 				
-				if pos then
+				if pos and pos.z then
 					CastSpell(_W, pos.x, pos.z)
 				end
 			end
@@ -593,7 +593,7 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 			else
 				pos, info = Prodiction.GetPrediction(Qtarget, Q.range, Q.speed, Q.delay, Q.width)
 			end
-			if pos then
+			if pos and pos.z then
 				CastSpell(_Q, pos.x, pos.z)
 			end
 		end
