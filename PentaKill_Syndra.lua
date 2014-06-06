@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 0.23
+local version = 0.24
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -497,16 +497,26 @@ end
 function Cast2Q(target)
 	if not Q.IsReady() then return end
 	if GetDistanceSqr(target) > Q.rangeSqr then
-
-		local QEtargetPos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Menu.EQ.Range / QE.speed), QE.width)
+		QEtargetPos = nil
+		Position = nil
+		if Menu.SelectPred.predictionType == 1 then
+			QEtargetPos, Hitchance, Position = VP:GetLineCastPosition(target, 0.6 - (Menu.EQ.Range / QE.speed), QE.width, QE.range, QE.speed)
+		else
+			QEtargetPos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Menu.EQ.Range / QE.speed), QE.width)
+		end
 		if QEtargetPos then 
 			local pos = Vector(myHero.visionPos) + Menu.EQ.Range * (Vector(QEtargetPos) - Vector(myHero.visionPos)):normalized()
 			CastSpell(_Q, pos.x, pos.z)
 		end
-
 	else
 		if Qdistance then
-			local QEtargetPos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Qdistance / QE.speed), QE.width)
+			QEtargetPos = nil
+			Position = nil
+			if Menu.SelectPred.predictionType == 1 then
+				QEtargetPos, Hitchance, Position = VP:GetLineCastPosition(target, 0.6 - (Qdistance / QE.speed), QE.width, QE.range, QE.speed)
+			else
+				QEtargetPos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Qdistance / QE.speed), QE.width)
+			end
 			if QEtargetPos then 
 				local pos = Vector(myHero.visionPos) + Qdistance * (Vector(QEtargetPos) - Vector(myHero.visionPos)):normalized()
 				CastSpell(_Q, pos.x, pos.z)
