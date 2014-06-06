@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 0.25
+local version = 0.26
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -525,7 +525,7 @@ function Cast2Q(target)
 			pos = nil
 			if Menu.SelectPred.predictionType == 1 then
 				VP.ShotAtMaxRange = true
-				pos, hitChance, nTargets = VP:GetCircularAOECastPosition(target, Q.delay, Q.width, Q.range, Q.speed)
+				pos, hitChance, nTargets = VP:GetCircularCastPosition(target, Q.delay, Q.width, Q.range, Q.speed)
 				VP.ShotAtMaxRange = false
 			else
 				pos, info = Prodiction.GetPrediction(target, Q.range, Q.speed, Q.delay, Q.width)
@@ -565,7 +565,7 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 				pos = nil
 				if Menu.SelectPred.predictionType == 1 then
 					VP.ShotAtMaxRange = true
-					pos, hitChance, nTargets = VP:GetCircularAOECastPosition(Qtarget, W.delay, W.width, W.range, W.speed)
+					pos, hitChance, nTargets = VP:GetCircularCastPosition(Qtarget, W.delay, W.width, W.range, W.speed)
 					VP.ShotAtMaxRange = false
 				else
 					pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
@@ -588,7 +588,7 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 			pos = nil
 			if Menu.SelectPred.predictionType == 1 then
 				VP.ShotAtMaxRange = true
-				pos, hitChance, nTargets = VP:GetCircularAOECastPosition(Qtarget, Q.delay, Q.width, Q.range, Q.speed)
+				pos, hitChance, nTargets = VP:GetCircularCastPosition(Qtarget, Q.delay, Q.width, Q.range, Q.speed)
 				VP.ShotAtMaxRange = false
 			else
 				pos, info = Prodiction.GetPrediction(Qtarget, Q.range, Q.speed, Q.delay, Q.width)
