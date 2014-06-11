@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 0.26
+local version = 1.0
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -105,20 +105,20 @@ function OnLoad()
 		Menu.Harass:addParam("Enabled", "Harass!", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
 		Menu.Harass:addParam("Enabled2", "Harass (toggle)!", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("L"))
 
-	--Menu:addSubMenu("Farm", "Farm")
-	--	Menu.Farm:addParam("UseQ",  "Use Q", SCRIPT_PARAM_LIST, 3, { "No", "Freeze", "LaneClear", "Both" })
-	--	Menu.Farm:addParam("UseW",  "Use W", SCRIPT_PARAM_LIST, 3, { "No", "Freeze", "LaneClear", "Both" })
-	--	Menu.Farm:addParam("UseE",  "Use E", SCRIPT_PARAM_LIST, 1, { "No", "Freeze", "LaneClear", "Both" })
-	--	Menu.Farm:addParam("ManaCheck2", "Don't farm if mana < % (freeze)", SCRIPT_PARAM_SLICE, 0, 0, 100)
-	--	Menu.Farm:addParam("ManaCheck", "Don't farm if mana < % (laneclear)", SCRIPT_PARAM_SLICE, 0, 0, 100)
-	--	Menu.Farm:addParam("Freeze", "Farm freezing", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("C"))
-	--	Menu.Farm:addParam("LaneClear", "Farm LaneClear", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("V"))
+	Menu:addSubMenu("Farm", "Farm")
+		Menu.Farm:addParam("UseQ",  "Use Q", SCRIPT_PARAM_LIST, 3, { "No", "Freeze", "LaneClear", "Both" })
+		Menu.Farm:addParam("UseW",  "Use W", SCRIPT_PARAM_LIST, 3, { "No", "Freeze", "LaneClear", "Both" })
+		Menu.Farm:addParam("UseE",  "Use E", SCRIPT_PARAM_LIST, 1, { "No", "Freeze", "LaneClear", "Both" })
+		Menu.Farm:addParam("ManaCheck2", "Don't farm if mana < % (freeze)", SCRIPT_PARAM_SLICE, 0, 0, 100)
+		Menu.Farm:addParam("ManaCheck", "Don't farm if mana < % (laneclear)", SCRIPT_PARAM_SLICE, 0, 0, 100)
+		Menu.Farm:addParam("Freeze", "Farm freezing", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("C"))
+		Menu.Farm:addParam("LaneClear", "Farm LaneClear", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("V"))
 
-	--Menu:addSubMenu("JungleFarm", "JungleFarm")
-	--	Menu.JungleFarm:addParam("UseQ",  "Use Q", SCRIPT_PARAM_ONOFF, true)
-	--	Menu.JungleFarm:addParam("UseW",  "Use W", SCRIPT_PARAM_ONOFF, true)
-	--	Menu.JungleFarm:addParam("UseE",  "Use E", SCRIPT_PARAM_ONOFF, false)
-	--	Menu.JungleFarm:addParam("Enabled", "Farm!", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("V"))
+	Menu:addSubMenu("JungleFarm", "JungleFarm")
+		Menu.JungleFarm:addParam("UseQ",  "Use Q", SCRIPT_PARAM_ONOFF, true)
+		Menu.JungleFarm:addParam("UseW",  "Use W", SCRIPT_PARAM_ONOFF, true)
+		Menu.JungleFarm:addParam("UseE",  "Use E", SCRIPT_PARAM_ONOFF, false)
+		Menu.JungleFarm:addParam("Enabled", "Farm!", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("V"))
 
 	Menu:addSubMenu("QE combo settings", "EQ")
 		Menu.EQ:addParam("Range", "Place Q at range:", SCRIPT_PARAM_SLICE, E.range, 0, E.range)
@@ -525,7 +525,7 @@ function Cast2Q(target)
 			pos = nil
 			if Menu.SelectPred.predictionType == 1 then
 				VP.ShotAtMaxRange = true
-				pos, hitChance, nTargets = VP:GetCircularCastPosition(target, Q.delay, Q.width, Q.range, Q.speed)
+				pos, hitChance, nTargets = VP:GetLineCastPosition(target, Q.delay, Q.width, Q.range, Q.speed)
 				VP.ShotAtMaxRange = false
 			else
 				pos, info = Prodiction.GetPrediction(target, Q.range, Q.speed, Q.delay, Q.width)
@@ -565,7 +565,7 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 				pos = nil
 				if Menu.SelectPred.predictionType == 1 then
 					VP.ShotAtMaxRange = true
-					pos, hitChance, nTargets = VP:GetCircularCastPosition(Qtarget, W.delay, W.width, W.range, W.speed)
+					pos, hitChance, nTargets = VP:GetLineCastPosition(Qtarget, W.delay, W.width, W.range, W.speed)
 					VP.ShotAtMaxRange = false
 				else
 					pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
@@ -588,7 +588,7 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 			pos = nil
 			if Menu.SelectPred.predictionType == 1 then
 				VP.ShotAtMaxRange = true
-				pos, hitChance, nTargets = VP:GetCircularCastPosition(Qtarget, Q.delay, Q.width, Q.range, Q.speed)
+				pos, hitChance, nTargets = VP:GetLineCastPosition(Qtarget, Q.delay, Q.width, Q.range, Q.speed)
 				VP.ShotAtMaxRange = false
 			else
 				pos, info = Prodiction.GetPrediction(Qtarget, Q.range, Q.speed, Q.delay, Q.width)
@@ -606,21 +606,20 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 		end
 	end
 
-
 	if UseE and E.IsReady() then
 		--Check to stun people with E
 		local validballs = GetValidBalls(true)
 		for i, enemy in ipairs(GetEnemyHeroes()) do
 			if ValidTarget(enemy) then
-				enemyPos = nil
-				if Menu.SelectPred.predictionType == 1 then
-					tmp1, tmp2, enemyPos = VP:GetPredictedPos(enemy, 0.25, QE.speed, myHero.visionPos, false)
-				else
-					enemyPos, info = Prodiction.GetPrediction(enemy, math.huge, QE.speed, 0.25)
-				end			
-				if enemyPos and enemyPos.z then
-					for i, ball in ipairs(validballs) do
-						if GetDistanceSqr(ball.object, myHero.visionPos) < E.rangeSqr then
+				for i, ball in ipairs(validballs) do
+					if GetDistanceSqr(ball.object, myHero.visionPos) < E.rangeSqr then
+						enemyPos = nil
+						if Menu.SelectPred.predictionType == 1 then
+							tmp1, tmp2, enemyPos = VP:GetPredictedPos(enemy, (E.delay + (GetDistance(myHero.visionPos, ball.object) / E.speed) - (GetDistance(myHero.visionPos, ball.object) / QE.speed)), QE.speed, myHero.visionPos, false)
+						else
+							enemyPos, info = Prodiction.GetPrediction(enemy, QE.range, QE.speed, (E.delay + (GetDistance(myHero.visionPos, ball.object) / E.speed) - (GetDistance(myHero.visionPos, ball.object) / QE.speed)), QE.width)
+						end	
+						if enemyPos and enemyPos.z then				
 							local EP = Vector(ball.object) +  (100+(-0.6 * GetDistance(ball.object, myHero.visionPos) + 966)) * (Vector(ball.object) - Vector(myHero.visionPos)):normalized()
 							local SP = Vector(ball.object) - 100 * (Vector(ball.object) - Vector(myHero.visionPos)):normalized()
 							local pointSegment, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(SP, EP, enemyPos)
@@ -683,7 +682,7 @@ function Harass()
 end
 
 function OnTick()
-	if Prodiction == nil then
+	if (Prodiction ~= nil and type(Prodiction) == "table") then
 		Menu.SelectPred.predictionType = 1
 	end
 	DLib.combo = GetCombo()
@@ -782,3 +781,150 @@ function OnDraw()
 		DrawText(tostring("AH"), 16, pos.x, pos.y, ARGB(255, 255, 255, 255))
 	end
 end
+
+
+function Farm()
+	if (Menu.Farm.ManaCheck > (myHero.mana / myHero.maxMana) * 100 and Menu.Farm.LaneClear) or (Menu.Farm.ManaCheck2 > (myHero.mana / myHero.maxMana) * 100 and Menu.Farm.Freeze) then return end
+	EnemyMinions:update()
+	local UseQ = Menu.Farm.LaneClear and (Menu.Farm.UseQ >= 3) or (Menu.Farm.UseQ == 2 or Menu.Farm.UseQ == 4)
+	local UseW = Menu.Farm.LaneClear and (Menu.Farm.UseW >= 3) or (Menu.Farm.UseW == 2 or Menu.Farm.UseW == 4)
+	local UseE = Menu.Farm.LaneClear and (Menu.Farm.UseE >= 3) or (Menu.Farm.UseE == 2 or Menu.Farm.UseE == 4)
+	
+	local CasterMinions = SelectUnits(EnemyMinions.objects, function(t) return (t.charName:lower():find("wizard") or t.charName:lower():find("caster")) and ValidTarget(t) and GetDistanceSqr(t) < W.rangeSqr end)
+	local MeleeMinions = SelectUnits(EnemyMinions.objects, function(t) return (t.charName:lower():find("basic") or t.charName:lower():find("cannon")) and ValidTarget(t) and GetDistanceSqr(t) < W.rangeSqr end)
+	
+	if UseW then
+		if W.status == 0 then
+			if #MeleeMinions > 1 then
+				CastSpell(_W, MeleeMinions[1].x, MeleeMinions[1].z)
+			elseif #CasterMinions > 1 then
+				CastSpell(_W, CasterMinions[1].x, CasterMinions[1].z)
+			end
+		else
+			local BestPos1, BestHit1 = GetBestCircularFarmPosition(W.range, w.width, CasterMinions)
+			local BestPos2, BestHit2 = GetBestCircularFarmPosition(W.range, w.width, MeleeMinions)
+
+			if BestHit1 > 2 or (BestPos1 and #CasterMinions <= 2) then
+				CastSpell(_W, BestPos1.x, BestPos1.z)
+			elseif BestHit2 > 2 or (BestPos2 and #MeleeMinions <= 2) then
+				CastSpell(_W, BestPos2.x, BestPos2.z)
+			end
+
+		end
+	end
+
+	if UseQ and ( not UseW or W.status == 0 ) then
+		CasterMinions = GetPredictedPositionsTable(VP, CasterMinions, Q.delay, Q.width, Q.range + Q.width, math.huge, myHero, false)
+		MeleeMinions = GetPredictedPositionsTable(VP, MeleeMinions, Q.delay, Q.width, Q.range + Q.width, math.huge, myHero, false)
+
+		local BestPos1, BestHit1 = GetBestCircularFarmPosition(Q.range + Q.width, Q.width, CasterMinions)
+		local BestPos2, BestHit2 = GetBestCircularFarmPosition(Q.range + Q.width, Q.width, MeleeMinions)
+
+		if BestPos1 and BestHit1 > 1 then
+			CastSpell(_Q, BestPos1.x, BestPos1.z)
+		elseif BestPos2 and BestHit2 > 1 then
+			CastSpell(_Q, BestPos2.x, BestPos2.z)
+		end
+	end
+
+	if UseE and (not Q.IsReady() or not UseQ) then
+		local AllMinions = SelectUnits(EnemyMinions.objects, function(t) return ValidTarget(t) and GetDistanceSqr(t) < E.rangeSqr end)
+		local BestPos, BestHit = GetBestCircularFarmPosition(E.range, E.width, AllMinions)
+		if BestHit > 4 then
+			CastSpell(_E, BestPos.x, BestPos.z)
+		else
+			local validballs = GetValidBalls()
+			local maxcount = 0
+			local maxpos
+
+			for i, ball in ipairs(validballs) do
+				if GetDistanceSqr(ball.object, myHero.visionPos) < Q.rangeSqr then
+					local Count = 0
+					for i, minion in ipairs(AllMinions) do
+						local EP = Vector(ball.object) +  (100+(-0.6 * GetDistance(ball.object, myHero.visionPos) + 966)) * (Vector(ball.object) - Vector(myHero.visionPos)):normalized()
+						local SP = Vector(myHero.visionPos)
+						local pointSegment, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(SP, EP, minion)
+						if isOnSegment and GetDistanceSqr(pointLine, enemyPos) < QE.width * QE.width then
+							Count = Count + 1
+						end
+					end
+					if Count > maxcount then
+						maxcount = Count
+						maxpos = Vector(ball.object)
+					end
+				end
+			end
+			if maxcount > 2 then
+				CastSpell(_E, maxpos.x, maxpos.z)
+			end
+		end
+	end
+end
+
+function JungleFarm()
+	JungleMinions:update()
+	local UseQ = Menu.JungleFarm.UseQ
+	local UseW = Menu.JungleFarm.UseW
+	local UseE = Menu.JungleFarm.UseE
+	local WUsed = false
+	local CloseMinions = SelectUnits(JungleMinions.objects, function(t) return GetDistanceSqr(t) <= W.rangeSqr and ValidTarget(t) end)
+	local AllMinions = SelectUnits(JungleMinions.objects, function(t) return ValidTarget(t) end)
+
+	local CloseMinion = CloseMinions[1]
+	local FarMinion = AllMinions[1]
+
+	
+
+	if ValidTarget(CloseMinion) then
+		local selectedTarget = GetTarget()
+
+		if selectedTarget and selectedTarget.type == CloseMinion.type then
+			DrawJungleStealingIndicator = true
+			SOWi:DisableAttacks()
+			if ValidTarget(selectedTarget) and DLib:IsKillable(selectedTarget, {_Q, _W}) and GetDistanceSqr(myHero.visionPos, selectedTarget) <= W.rangeSqr and W.IsReady() then
+				if W.status == 0 then
+					CastSpell(_W, selectedTarget.x, selectedTarget.z)
+				end
+			end
+		else
+			if UseW then
+				if W.status == 0 then
+					local validball = GetWValidBall(true)
+					if validball and validball.added then
+						CastSpell(_W, validball.object.x, validball.object.z)
+						WUsed = true
+					end
+				else
+					if WObject.name and WObject.name:find("Seed") then
+						CastSpell(_W, CloseMinion)
+						WUsed = true
+					else
+						CastSpell(_W, myHero.x, myHero.z)
+						WUsed = true
+					end
+				end
+			end
+
+			if UseQ then
+				CastSpell(_Q, CloseMinion)
+			end
+
+			if UseE and os.clock() - Q.LastCastTime > 1 then
+				CastSpell(_E, CloseMinion)
+			end
+		end
+	elseif ValidTarget(FarMinion) and GetDistanceSqr(FarMinion) <= (Q.range + 588)^2 and GetDistanceSqr(FarMinion) > Q.rangeSqr and DLib:IsKillable(FarMinion, {_E}) then
+		if Q.IsReady() and E.IsReady() then
+			local QPos = Vector(myHero.visionPos) + Q.range * (Vector(FarMinion) - Vector(myHero)):normalized()
+			CastSpell(_Q, QPos.x, QPos.z)
+			QECombo = os.clock()
+		end
+	end
+
+	if W.status == 1 and not WUsed then
+		if (not WObject.name or not WObject.name:find("Seed")) and WObject.type == 'obj_AI_Minion' then
+			CastSpell(_W, myHero.x, myHero.z)
+		end
+	end
+end
+
