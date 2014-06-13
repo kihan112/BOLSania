@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.0
+local version = 1.01
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -682,7 +682,7 @@ function Harass()
 end
 
 function OnTick()
-	if (Prodiction ~= nil and type(Prodiction) == "table") then
+	if not (Prodiction ~= nil and Prodiction.GetPrediction ~= nil) then
 		Menu.SelectPred.predictionType = 1
 	end
 	DLib.combo = GetCombo()
@@ -698,13 +698,13 @@ function OnTick()
 		Harass()
 	end
 
-	--if Menu.Farm.LaneClear or Menu.Farm.Freeze then
-	--	Farm()
-	--end
+	if Menu.Farm.LaneClear or Menu.Farm.Freeze then
+		Farm()
+	end
 
-	--if Menu.JungleFarm.Enabled then
-	--	JungleFarm()
-	--end
+	if Menu.JungleFarm.Enabled then
+		JungleFarm()
+	end
 
 	if Menu.Misc.WPet then
 		AutoGrabPets()
