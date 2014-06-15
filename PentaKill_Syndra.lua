@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.01
+local version = 1.02
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -801,8 +801,8 @@ function Farm()
 				CastSpell(_W, CasterMinions[1].x, CasterMinions[1].z)
 			end
 		else
-			local BestPos1, BestHit1 = GetBestCircularFarmPosition(W.range, w.width, CasterMinions)
-			local BestPos2, BestHit2 = GetBestCircularFarmPosition(W.range, w.width, MeleeMinions)
+			local BestPos1, BestHit1 = GetBestCircularFarmPosition(W.range, W.width, CasterMinions)
+			local BestPos2, BestHit2 = GetBestCircularFarmPosition(W.range, W.width, MeleeMinions)
 
 			if BestHit1 > 2 or (BestPos1 and #CasterMinions <= 2) then
 				CastSpell(_W, BestPos1.x, BestPos1.z)
