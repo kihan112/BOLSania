@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.02
+local version = 1.10
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -36,7 +36,7 @@ if RequireI.downloadNeeded == true then return end
 local Q = {range = 790, rangeSqr = math.pow(790, 2), width = 125, delay = 0.6, speed = math.huge, LastCastTime = 0, IsReady = function() return myHero:CanUseSpell(_Q) == READY end}
 local W = {range = 925, rangeSqr = math.pow(925, 2), width = 190, delay = 0.8, speed = math.huge, LastCastTime = 0, IsReady = function() return myHero:CanUseSpell(_W) == READY end, status = 0}
 local E = {range = 700, rangeSqr = math.pow(700, 2), width = 45 * 0.5, delay = 0.25, speed = 2500, LastCastTime = 0, IsReady = function() return myHero:CanUseSpell(_E) == READY end}
-local R = {range = 675, rangeSqr = math.pow(675, 2), delay = 0.25, IsReady = function() return myHero:CanUseSpell(_R) == READY end}
+local R = {range = 725, rangeSqr = math.pow(725, 2), delay = 0.25, IsReady = function() return myHero:CanUseSpell(_R) == READY end}
 local QE = {range = 1290, rangeSqr = math.pow(1290, 2), width = 60, delay = 0, speed = 1600}
 
 local pets = {"annietibbers", "shacobox", "malzaharvoidling", "heimertyellow", "heimertblue", "yorickdecayedghoul"}
@@ -82,8 +82,8 @@ function OnLoad()
 
 
          
-         Menu:addSubMenu("Choose Prediction Type", "SelectPred")
-         Menu.SelectPred:addParam("predictionType", "Prediction Type", SCRIPT_PARAM_LIST, 2, { "VPrediction", "Prodiction" })
+         Menu:addSubMenu("Choose HitChance", "HitChance")
+         Menu.HitChance:addParam("HitChance", "HitChance", SCRIPT_PARAM_LIST, 1, { "LOW", "NORMAL", "HIGH", "VERY_HIGH" })
 
 
 
@@ -453,14 +453,9 @@ function CastQE2(BallInfo)
 		if ValidTarget(enemy) then
 			if GetDistanceSqr(BallInfo.object, myHero.visionPos) < E.rangeSqr then
 
-				enemyPos = nil
-				if Menu.SelectPred.predictionType == 1 then
-					tmp1, tmp2, enemyPos = VP:GetPredictedPos(enemy, (E.delay + (GetDistance(myHero.visionPos, BallInfo.object) / E.speed) - (GetDistance(myHero.visionPos, BallInfo.object) / QE.speed)), QE.speed, myHero.visionPos, false)
-				else
-					enemyPos, info = Prodiction.GetPrediction(enemy, QE.range, QE.speed, (E.delay + (GetDistance(myHero.visionPos, BallInfo.object) / E.speed) - (GetDistance(myHero.visionPos, BallInfo.object) / QE.speed)), QE.width)
-				end		
+				local enemyPos, info = Prodiction.GetPrediction(enemy, QE.range, QE.speed, (E.delay + (GetDistance(myHero.visionPos, BallInfo.object) / E.speed) - (GetDistance(myHero.visionPos, BallInfo.object) / QE.speed)), QE.width)
 
-				if enemyPos and enemyPos.z then		
+				if info.hitchance >= Menu.HitChance.HitChance and enemyPos and enemyPos.z then		
 					local EP = Vector(BallInfo.object) +  (100+(-0.6 * GetDistance(BallInfo.object, myHero.visionPos) + 966)) * (Vector(BallInfo.object) - Vector(myHero.visionPos)):normalized()
 					local SP = Vector(BallInfo.object) - 100 * (Vector(BallInfo.object) - Vector(myHero.visionPos)):normalized()
 					local pointSegment, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(SP, EP, enemyPos)
@@ -497,41 +492,36 @@ end
 function Cast2Q(target)
 	if not Q.IsReady() then return end
 	if GetDistanceSqr(target) > Q.rangeSqr then
-		QEtargetPos = nil
-		Position = nil
-		if Menu.SelectPred.predictionType == 1 then
-			QEtargetPos, Hitchance, Position = VP:GetLineCastPosition(target, 0.6 - (Menu.EQ.Range / QE.speed), QE.width, QE.range, QE.speed)
-		else
-			QEtargetPos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Menu.EQ.Range / QE.speed), QE.width)
-		end
-		if QEtargetPos and QEtargetPos.z then 
+
+		local QEtargetPos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Menu.EQ.Range / QE.speed), QE.width)
+
+		if info.hitchance >= Menu.HitChance.HitChance and QEtargetPos and QEtargetPos.z then 
 			local pos = Vector(myHero.visionPos) + Menu.EQ.Range * (Vector(QEtargetPos) - Vector(myHero.visionPos)):normalized()
 			CastSpell(_Q, pos.x, pos.z)
 		end
 	else
 		if Qdistance then
-			QEtargetPos = nil
-			Position = nil
-			if Menu.SelectPred.predictionType == 1 then
-				QEtargetPos, Hitchance, Position = VP:GetLineCastPosition(target, 0.6 - (Qdistance / QE.speed), QE.width, QE.range, QE.speed)
-			else
-				QEtargetPos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Qdistance / QE.speed), QE.width)
-			end
-			if QEtargetPos and QEtargetPos.z then 
+			local QEtargetPos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Qdistance / QE.speed), QE.width)
+
+			if info.hitchance >= Menu.HitChance.HitChance and QEtargetPos and QEtargetPos.z then 
 				local pos = Vector(myHero.visionPos) + Qdistance * (Vector(QEtargetPos) - Vector(myHero.visionPos)):normalized()
 				CastSpell(_Q, pos.x, pos.z)
 			end
 		else
-			pos = nil
-			if Menu.SelectPred.predictionType == 1 then
-				VP.ShotAtMaxRange = true
-				pos, hitChance, nTargets = VP:GetLineCastPosition(target, Q.delay, Q.width, Q.range, Q.speed)
-				VP.ShotAtMaxRange = false
-			else
-				pos, info = Prodiction.GetPrediction(target, Q.range, Q.speed, Q.delay, Q.width)
-			end
-			if pos and pos.z then
-				CastSpell(_Q, pos.x, pos.z)
+
+			local QEtargetPos, info = Prodiction.GetPrediction(target, Q.delay)
+
+			if info.hitchance >= Menu.HitChance.HitChance and QEtargetPos and QEtargetPos.z then
+				if GetDistanceSqr(QEtargetPos) > Q.rangeSqr then
+					local pos, info = Prodiction.GetPrediction(target, QE.range, QE.speed, 0.6 - (Menu.EQ.Range / QE.speed), QE.width)
+					if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
+						local posB = Vector(myHero.visionPos) + Menu.EQ.Range * (Vector(QEtargetPos) - Vector(myHero.visionPos)):normalized()
+						CastSpell(_Q, posB.x, posB.z)
+					end
+				else
+					local pos = Vector(myHero.visionPos) + (GetDistance(QEtargetPos) - 50) * (Vector(QEtargetPos) - Vector(myHero.visionPos)):normalized()
+					CastSpell(_Q, pos.x, pos.z)
+				end
 			end
 		end
 	end
@@ -559,19 +549,23 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 		UseR = false
 	end
 
+	if UseEQ then
+		if (Qtarget or QEtarget) and E.IsReady() and Q.IsReady() then
+			if Qtarget then
+				StartEQCombo(Qtarget)
+			else
+				StartEQCombo(QEtarget)
+			end		
+		end
+	end
+
 	if UseW and W.IsReady() then
 		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > 0.25) then
 			if WObject.charName == nil or WObject.charName:lower() ~= "heimertblue" then 
-				pos = nil
-				if Menu.SelectPred.predictionType == 1 then
-					VP.ShotAtMaxRange = true
-					pos, hitChance, nTargets = VP:GetLineCastPosition(Qtarget, W.delay, W.width, W.range, W.speed)
-					VP.ShotAtMaxRange = false
-				else
-					pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
-				end
+
+				local pos, info = Prodiction.GetCircularAOEPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
 				
-				if pos and pos.z then
+				if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
 					CastSpell(_W, pos.x, pos.z)
 				end
 			end
@@ -585,24 +579,12 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 
 	if UseQ and Q.IsReady() then
 		if Qtarget and os.clock() - W.LastCastTime > 0.25 and os.clock() - E.LastCastTime > 0.25 then
-			pos = nil
-			if Menu.SelectPred.predictionType == 1 then
-				VP.ShotAtMaxRange = true
-				pos, hitChance, nTargets = VP:GetLineCastPosition(Qtarget, Q.delay, Q.width, Q.range, Q.speed)
-				VP.ShotAtMaxRange = false
-			else
-				pos, info = Prodiction.GetPrediction(Qtarget, Q.range, Q.speed, Q.delay, Q.width)
-			end
-			if pos and pos.z then
+
+			local pos, info = Prodiction.GetCircularAOEPrediction(Qtarget, Q.range, Q.speed, Q.delay, Q.width)
+
+			if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
 				CastSpell(_Q, pos.x, pos.z)
 			end
-		end
-	end
-
-
-	if UseEQ then
-		if not Qtarget and QEtarget and E.IsReady() and Q.IsReady() then
-			StartEQCombo(QEtarget)
 		end
 	end
 
@@ -613,13 +595,10 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 			if ValidTarget(enemy) then
 				for i, ball in ipairs(validballs) do
 					if GetDistanceSqr(ball.object, myHero.visionPos) < E.rangeSqr then
-						enemyPos = nil
-						if Menu.SelectPred.predictionType == 1 then
-							tmp1, tmp2, enemyPos = VP:GetPredictedPos(enemy, (E.delay + (GetDistance(myHero.visionPos, ball.object) / E.speed) - (GetDistance(myHero.visionPos, ball.object) / QE.speed)), QE.speed, myHero.visionPos, false)
-						else
-							enemyPos, info = Prodiction.GetPrediction(enemy, QE.range, QE.speed, (E.delay + (GetDistance(myHero.visionPos, ball.object) / E.speed) - (GetDistance(myHero.visionPos, ball.object) / QE.speed)), QE.width)
-						end	
-						if enemyPos and enemyPos.z then				
+
+						local enemyPos, info = Prodiction.GetPrediction(enemy, QE.range, QE.speed, (E.delay + (GetDistance(myHero.visionPos, ball.object) / E.speed) - (GetDistance(myHero.visionPos, ball.object) / QE.speed)), QE.width)
+
+						if info.hitchance >= Menu.HitChance.HitChance and enemyPos and enemyPos.z then				
 							local EP = Vector(ball.object) +  (100+(-0.6 * GetDistance(ball.object, myHero.visionPos) + 966)) * (Vector(ball.object) - Vector(myHero.visionPos)):normalized()
 							local SP = Vector(ball.object) - 100 * (Vector(ball.object) - Vector(myHero.visionPos)):normalized()
 							local pointSegment, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(SP, EP, enemyPos)
@@ -660,9 +639,9 @@ function UpdateSpellData()
 		E.width = 2 * E.width
 	end
 
-	if R.range ~= (750) and myHero:GetSpellData(_R).level  == 3 then
-		R.range = 750
-		R.rangeSqr = math.pow(750, 2)
+	if R.range ~= (800) and myHero:GetSpellData(_R).level  == 3 then
+		R.range = 800
+		R.rangeSqr = math.pow(800, 2)
 	end
 
 	W.status = WObject and 1 or 0
@@ -682,9 +661,6 @@ function Harass()
 end
 
 function OnTick()
-	if not (Prodiction ~= nil and Prodiction.GetPrediction ~= nil) then
-		Menu.SelectPred.predictionType = 1
-	end
 	DLib.combo = GetCombo()
 	DrawJungleStealingIndicator = false
 	BTOnTick()
