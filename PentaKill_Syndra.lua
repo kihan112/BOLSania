@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.10
+local version = 1.11
 local AUTOUPDATE = false
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -559,6 +559,17 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 		end
 	end
 
+	if UseQ and Q.IsReady() then
+		if Qtarget and os.clock() - W.LastCastTime > 0.25 and os.clock() - E.LastCastTime > 0.25 then
+
+			local pos, info = Prodiction.GetCircularAOEPrediction(Qtarget, Q.range, Q.speed, Q.delay, Q.width)
+
+			if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
+				CastSpell(_Q, pos.x, pos.z)
+			end
+		end
+	end
+
 	if UseW and W.IsReady() then
 		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > 0.25) then
 			if WObject.charName == nil or WObject.charName:lower() ~= "heimertblue" then 
@@ -573,17 +584,6 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 			local validball = GetWValidBall()
 			if validball then
 				CastSpell(_W, validball.object.x, validball.object.z)
-			end
-		end
-	end
-
-	if UseQ and Q.IsReady() then
-		if Qtarget and os.clock() - W.LastCastTime > 0.25 and os.clock() - E.LastCastTime > 0.25 then
-
-			local pos, info = Prodiction.GetCircularAOEPrediction(Qtarget, Q.range, Q.speed, Q.delay, Q.width)
-
-			if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
-				CastSpell(_Q, pos.x, pos.z)
 			end
 		end
 	end
