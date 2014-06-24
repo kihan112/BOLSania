@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.12
+local version = 1.20
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -37,7 +37,7 @@ local Q = {range = 790, rangeSqr = math.pow(790, 2), width = 125, delay = 0.6, s
 local W = {range = 925, rangeSqr = math.pow(925, 2), width = 190, delay = 0.8, speed = math.huge, LastCastTime = 0, IsReady = function() return myHero:CanUseSpell(_W) == READY end, status = 0}
 local E = {range = 700, rangeSqr = math.pow(700, 2), width = 45 * 0.5, delay = 0.25, speed = 2500, LastCastTime = 0, IsReady = function() return myHero:CanUseSpell(_E) == READY end}
 local R = {range = 725, rangeSqr = math.pow(725, 2), delay = 0.25, IsReady = function() return myHero:CanUseSpell(_R) == READY end}
-local QE = {range = 1290, rangeSqr = math.pow(1290, 2), width = 60, delay = 0, speed = 1600}
+local QE = {range = 1280, rangeSqr = math.pow(1280, 2), width = 60, delay = 0, speed = 1600}
 
 local pets = {"annietibbers", "shacobox", "malzaharvoidling", "heimertyellow", "heimertblue", "yorickdecayedghoul"}
 
@@ -616,15 +616,15 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 	end
 
 
-	if not Q.IsReady() then
-		if (((Qtarget and not Menu.R.Targets[Qtarget.hash]) or (Rtarget and not Menu.R.Targets[Rtarget.hash])) or (os.clock() - UseRTime < 10)) and UseR then
-			if Qtarget and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Qtarget, GetCombo(Qtarget)) and not DLib:IsKillable(Qtarget, {_Q, _W}) then
+	if not Q.IsReady() and not W.IsReady() then
+		if ((Qtarget and not Menu.R.Targets[Qtarget.hash]) or (Rtarget and not Menu.R.Targets[Rtarget.hash])) and UseR then
+			if Qtarget and ((GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Qtarget, GetCombo(Qtarget)) and not DLib:IsKillable(Qtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
 				ItemManager:CastOffensiveItems(Qtarget)
 				if _IGNITE and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < 600 * 600 then
 					CastSpell(_IGNITE, Qtarget)
 				end
 				CastSpell(_R, Qtarget)
-			elseif Rtarget and GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Rtarget, GetCombo(Rtarget)) and not DLib:IsKillable(Rtarget, {_Q, _W}) then
+			elseif Rtarget and ((GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Rtarget, GetCombo(Rtarget)) and not DLib:IsKillable(Rtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
 				ItemManager:CastOffensiveItems(Rtarget)
 				if _IGNITE and GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < 600 * 600 then
 					CastSpell(_IGNITE, Rtarget)
@@ -711,12 +711,8 @@ function OnTick()
 				closestdist = dist
 			end
 		end
-		if ClosestTargetMouse and GetDistanceSqr(ClosestTargetMouse, myHero.visionPos) < (QE.range + 300)^2 then
-			if GetDistanceSqr(ClosestTargetMouse) < Q.rangeSqr then
-				StartEQCombo(ClosestTargetMouse, true)
-			else
-				StartEQCombo(ClosestTargetMouse)
-			end
+		if ClosestTargetMouse and GetDistanceSqr(ClosestTargetMouse, myHero.visionPos) < QE.rangeSqr then
+			StartEQCombo(ClosestTargetMouse)
 		end
 	end
 end
