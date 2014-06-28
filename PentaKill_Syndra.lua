@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.20
+local version = 1.21
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -57,7 +57,7 @@ function OnLoad()
 	DLib = DamageLib()
 	DManager = DrawManager()
 
-
+	DLib:RegisterDamageSource(_AQ, _MAGIC, 30, 40, _MAGIC, _AP, 0.60, function() return true end)--Without the 15% increase at rank 5
 	DLib:RegisterDamageSource(_Q, _MAGIC, 30, 40, _MAGIC, _AP, 0.60, function() return (player:CanUseSpell(_Q) == READY) end)--Without the 15% increase at rank 5
 	DLib:RegisterDamageSource(_LV5Q, _MAGIC, 264.5, 0, _MAGIC, _AP, 0.69, function() return (player:CanUseSpell(_Q) == READY) end)--With the 15% increase at rank 5
 	DLib:RegisterDamageSource(_W, _MAGIC, 40, 40, _MAGIC, _AP, 0.70, function() return (player:CanUseSpell(_W) == READY) end)
@@ -94,6 +94,7 @@ function OnLoad()
 		Menu.Combo:addParam("UseE", "Use E", SCRIPT_PARAM_ONOFF, true)
 		Menu.Combo:addParam("UseEQ", "Use QE", SCRIPT_PARAM_ONOFF, true)
 		Menu.Combo:addParam("UseR", "Use R", SCRIPT_PARAM_ONOFF, true)
+		Menu.Combo:addParam("AntiOverKill", "Don't use R if enemy is killable with Q", SCRIPT_PARAM_ONOFF, true)
 		Menu.Combo:addParam("Enabled", "Use Combo!", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 
 	Menu:addSubMenu("Harass", "Harass")
@@ -562,7 +563,7 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 	if UseQ and Q.IsReady() then
 		if Qtarget and os.clock() - W.LastCastTime > 0.25 and os.clock() - E.LastCastTime > 0.25 then
 
-			local pos, info = Prodiction.GetCircularAOEPrediction(Qtarget, Q.range, Q.speed, Q.delay, Q.width)
+			local pos, info = Prodiction.GetPrediction(Qtarget, Q.range, Q.speed, Q.delay, Q.width)
 
 			if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
 				CastSpell(_Q, pos.x, pos.z)
@@ -574,7 +575,7 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > 0.25) then
 			if WObject.charName == nil or WObject.charName:lower() ~= "heimertblue" then 
 
-				local pos, info = Prodiction.GetCircularAOEPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
+				local pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
 				
 				if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
 					CastSpell(_W, pos.x, pos.z)
@@ -618,13 +619,13 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 
 	if not Q.IsReady() and not W.IsReady() then
 		if ((Qtarget and not Menu.R.Targets[Qtarget.hash]) or (Rtarget and not Menu.R.Targets[Rtarget.hash])) and UseR then
-			if Qtarget and ((GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Qtarget, GetCombo(Qtarget)) and not DLib:IsKillable(Qtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
+			if Qtarget and ((GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Qtarget, GetCombo(Qtarget)) and (not Menu.Combo.AntiOverKill or not DLib:IsKillable(Qtarget, {_AQ})) and not DLib:IsKillable(Qtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
 				ItemManager:CastOffensiveItems(Qtarget)
 				if _IGNITE and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < 600 * 600 then
 					CastSpell(_IGNITE, Qtarget)
 				end
 				CastSpell(_R, Qtarget)
-			elseif Rtarget and ((GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Rtarget, GetCombo(Rtarget)) and not DLib:IsKillable(Rtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
+			elseif Rtarget and ((GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Rtarget, GetCombo(Rtarget)) and (not Menu.Combo.AntiOverKill or not DLib:IsKillable(Rtarget, {_AQ})) and not DLib:IsKillable(Rtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
 				ItemManager:CastOffensiveItems(Rtarget)
 				if _IGNITE and GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < 600 * 600 then
 					CastSpell(_IGNITE, Rtarget)
