@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.21
+local version = 1.22
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -411,7 +411,7 @@ function OnGapclose(unit, data)
 end
 
 function OnRecvPacket(p)
-	if p.header == 112 then
+	if p.header == 113 then
 		p.pos = 1
 		local NetworkID = p:DecodeF()
 		local Active = p:Decode1()
