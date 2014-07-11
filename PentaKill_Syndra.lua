@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.22
+local version = 1.23
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -197,6 +197,15 @@ function GetCombo(target)
 		end
 		return result
 	end
+end
+
+
+function GetUltCombo()
+	local result = {}
+	for i = 1, #GetValidBalls() do
+		table.insert(result, _R)
+	end
+	return result
 end
 
 -- Track the balls
@@ -550,6 +559,24 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 		UseR = false
 	end
 
+	if UseW and W.IsReady() then
+		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > 0.25) then
+			if WObject.charName == nil or WObject.charName:lower() ~= "heimertblue" then 
+
+				local pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
+				
+				if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
+					CastSpell(_W, pos.x, pos.z)
+				end
+			end
+		elseif Qtarget and W.status == 0 and (os.clock() - E.LastCastTime > 0.7) and (os.clock() - Q.LastCastTime > 0.7) then
+			local validball = GetWValidBall()
+			if validball then
+				CastSpell(_W, validball.object.x, validball.object.z)
+			end
+		end
+	end
+
 	if UseEQ then
 		if (Qtarget or QEtarget) and E.IsReady() and Q.IsReady() then
 			if Qtarget then
@@ -567,24 +594,6 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 
 			if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
 				CastSpell(_Q, pos.x, pos.z)
-			end
-		end
-	end
-
-	if UseW and W.IsReady() then
-		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > 0.25) then
-			if WObject.charName == nil or WObject.charName:lower() ~= "heimertblue" then 
-
-				local pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
-				
-				if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
-					CastSpell(_W, pos.x, pos.z)
-				end
-			end
-		elseif Qtarget and W.status == 0 and (os.clock() - E.LastCastTime > 0.7) and (os.clock() - Q.LastCastTime > 0.7) then
-			local validball = GetWValidBall()
-			if validball then
-				CastSpell(_W, validball.object.x, validball.object.z)
 			end
 		end
 	end
@@ -617,8 +626,8 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 	end
 
 
-	if not Q.IsReady() and not W.IsReady() then
-		if ((Qtarget and not Menu.R.Targets[Qtarget.hash]) or (Rtarget and not Menu.R.Targets[Rtarget.hash])) and UseR then
+	if UseR and not Q.IsReady() and not W.IsReady() then
+		if ((Qtarget and not Menu.R.Targets[Qtarget.hash]) or (Rtarget and not Menu.R.Targets[Rtarget.hash])) then
 			if Qtarget and ((GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Qtarget, GetCombo(Qtarget)) and (not Menu.Combo.AntiOverKill or not DLib:IsKillable(Qtarget, {_AQ})) and not DLib:IsKillable(Qtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
 				ItemManager:CastOffensiveItems(Qtarget)
 				if _IGNITE and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < 600 * 600 then
@@ -631,6 +640,18 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 					CastSpell(_IGNITE, Rtarget)
 				end
 				CastSpell(_R, Rtarget)
+			end
+		end
+	end
+
+	if UseR and not Q:IsReady() and R:IsReady() and not DFGUsed then
+		for i, enemy in ipairs(GetEnemyHeroes()) do
+			if ValidTarget(enemy) and (not Menu.R.Targets[enemy.hash] or (os.clock() - UseRTime < 10)) and GetDistanceSqr(enemy.visionPos, myHero.visionPos) < R.rangeSqr then
+				if DLib:IsKillable(enemy, GetUltCombo())  or (os.clock() - UseRTime < 10) then
+					if not DLib:IsKillable(enemy, {_Q, _E, _W})  or (os.clock() - UseRTime < 10) then
+						CastSpell(_R, enemy)
+					end
+				end
 			end
 		end
 	end
