@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.23
+local version = 1.24
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -560,7 +560,7 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 	end
 
 	if UseW and W.IsReady() then
-		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > 0.25) then
+		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > (QE.range / QE.speed) +  (0.6 - (Menu.EQ.Range / QE.speed))) then
 			if WObject.charName == nil or WObject.charName:lower() ~= "heimertblue" then 
 
 				local pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
@@ -568,11 +568,6 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 				if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
 					CastSpell(_W, pos.x, pos.z)
 				end
-			end
-		elseif Qtarget and W.status == 0 and (os.clock() - E.LastCastTime > 0.7) and (os.clock() - Q.LastCastTime > 0.7) then
-			local validball = GetWValidBall()
-			if validball then
-				CastSpell(_W, validball.object.x, validball.object.z)
 			end
 		end
 	end
@@ -624,7 +619,15 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 			end
 		end
 	end
-
+	
+	if UseW and W.IsReady() then
+		if Qtarget and W.status == 0 and (os.clock() - E.LastCastTime > 0.7) and (os.clock() - Q.LastCastTime > 0.7) then
+			local validball = GetWValidBall()
+			if validball then
+				CastSpell(_W, validball.object.x, validball.object.z)
+			end
+		end
+	end
 
 	if UseR and not Q.IsReady() and not W.IsReady() then
 		if ((Qtarget and not Menu.R.Targets[Qtarget.hash]) or (Rtarget and not Menu.R.Targets[Rtarget.hash])) then
