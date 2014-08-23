@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.24
+local version = 1.25
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -83,7 +83,7 @@ function OnLoad()
 
          
          Menu:addSubMenu("Choose HitChance", "HitChance")
-         Menu.HitChance:addParam("HitChance", "HitChance", SCRIPT_PARAM_LIST, 1, { "LOW", "NORMAL", "HIGH", "VERY_HIGH" })
+         Menu.HitChance:addParam("HitChance", "HitChance", SCRIPT_PARAM_LIST, 1, { "LOW", "NORMAL"})
 
 
 
@@ -102,6 +102,7 @@ function OnLoad()
 		Menu.Harass:addParam("UseW", "Use W", SCRIPT_PARAM_ONOFF, false)
 		Menu.Harass:addParam("UseE", "Use E", SCRIPT_PARAM_ONOFF, false)
 		Menu.Harass:addParam("UseEQ", "Use QE", SCRIPT_PARAM_ONOFF, false)
+		Menu.Harass:addParam("AAHarass", "Auto harass when enemy do AA", SCRIPT_PARAM_ONOFF, true)
 		Menu.Harass:addParam("ManaCheck", "Don't harass if mana < %", SCRIPT_PARAM_SLICE, 0, 0, 100)
 		Menu.Harass:addParam("Enabled", "Harass!", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
 		Menu.Harass:addParam("Enabled2", "Harass (toggle)!", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("L"))
@@ -222,6 +223,13 @@ function OnProcessSpell(unit, spell)
 			W.LastCastTime = os.clock()
 		elseif spell.name == "syndrae5" then
 			E.LastCastTime = os.clock()
+		end
+	end
+	if (Menu.Harass.AAHarass) and (unit.team ~= myHero.team) then
+		if unit.type == myHero.type and unit ~= nil then
+			if spell.name:lower():find("attack") then
+				Harass(unit)
+			end
 		end
 	end
 end
@@ -537,13 +545,16 @@ function Cast2Q(target)
 	end
 end
 
-function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
+function UseSpells(UseQ, UseW, UseE, UseEQ, UseR, forcedtarget)
 
 	local Qtarget
 	local QEtarget
 	local Rtarget
-
-	if STS == nil then
+	if forcedtarget ~= nil then
+		Qtarget = forcedtarget
+		QEtarget = forcedtarget
+		Rtarget = forcedtarget
+	elseif STS == nil then
 		Qtarget = Selector.GetTarget(SelectorMenu.Get().mode, 'AP', {distance = W.range})
 		QEtarget = Selector.GetTarget(SelectorMenu.Get().mode, 'AP', {distance = QE.range})
 		Rtarget = Selector.GetTarget(SelectorMenu.Get().mode, 'AP', {distance = R.range})
@@ -557,19 +568,6 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 
 	if (os.clock() - DontUseRTime < 10) then
 		UseR = false
-	end
-
-	if UseW and W.IsReady() then
-		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > (QE.range / QE.speed) +  (0.6 - (Menu.EQ.Range / QE.speed))) then
-			if WObject.charName == nil or WObject.charName:lower() ~= "heimertblue" then 
-
-				local pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
-				
-				if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
-					CastSpell(_W, pos.x, pos.z)
-				end
-			end
-		end
 	end
 
 	if UseEQ then
@@ -589,6 +587,19 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR)
 
 			if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
 				CastSpell(_Q, pos.x, pos.z)
+			end
+		end
+	end
+
+	if UseW and W.IsReady() then
+		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > (QE.range / QE.speed) +  (0.6 - (Menu.EQ.Range / QE.speed))) then
+			if WObject.charName == nil or WObject.charName:lower() ~= "heimertblue" then 
+
+				local pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
+				
+				if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
+					CastSpell(_W, pos.x, pos.z)
+				end
 			end
 		end
 	end
@@ -683,9 +694,9 @@ function Combo()
 	UseSpells(Menu.Combo.UseQ, Menu.Combo.UseW, Menu.Combo.UseE, Menu.Combo.UseEQ, Menu.Combo.UseR)
 end
 
-function Harass()
+function Harass(target)
 	if Menu.Harass.ManaCheck > (myHero.mana / myHero.maxMana) * 100 then return end
-	UseSpells(Menu.Harass.UseQ, Menu.Harass.UseW, Menu.Harass.UseE, Menu.Harass.UseEQ, false)
+	UseSpells(Menu.Harass.UseQ, Menu.Harass.UseW, Menu.Harass.UseE, Menu.Harass.UseEQ, false, target)
 end
 
 function OnTick()
