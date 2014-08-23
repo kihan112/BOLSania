@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.25
+local version = 1.26
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -225,7 +225,7 @@ function OnProcessSpell(unit, spell)
 			E.LastCastTime = os.clock()
 		end
 	end
-	if (Menu.Harass.AAHarass) and (unit.team ~= myHero.team) then
+	if (Menu.Harass.AAHarass) and (unit.team ~= myHero.team) and (GetDistance(myHero.visionPos, unit) <= Q.range) then
 		if unit.type == myHero.type and unit ~= nil then
 			if spell.name:lower():find("attack") then
 				Harass(unit)
