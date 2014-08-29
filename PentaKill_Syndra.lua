@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.26
+local version = 1.27
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -570,6 +570,19 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR, forcedtarget)
 		UseR = false
 	end
 
+	if UseW and W.IsReady() then
+		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > (QE.range / QE.speed) +  (0.6 - (Menu.EQ.Range / QE.speed))) then
+			if WObject.charName == nil or WObject.charName:lower() ~= "heimertblue" then 
+
+				local pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
+				
+				if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
+					CastSpell(_W, pos.x, pos.z)
+				end
+			end
+		end
+	end
+
 	if UseEQ then
 		if (Qtarget or QEtarget) and E.IsReady() and Q.IsReady() then
 			if Qtarget then
@@ -587,19 +600,6 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR, forcedtarget)
 
 			if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
 				CastSpell(_Q, pos.x, pos.z)
-			end
-		end
-	end
-
-	if UseW and W.IsReady() then
-		if Qtarget and W.status == 1 and (os.clock() - Q.LastCastTime > 0.25) and (os.clock() - E.LastCastTime > (QE.range / QE.speed) +  (0.6 - (Menu.EQ.Range / QE.speed))) then
-			if WObject.charName == nil or WObject.charName:lower() ~= "heimertblue" then 
-
-				local pos, info = Prodiction.GetPrediction(Qtarget, W.range, W.speed, W.delay, W.width)
-				
-				if info.hitchance >= Menu.HitChance.HitChance and pos and pos.z then
-					CastSpell(_W, pos.x, pos.z)
-				end
 			end
 		end
 	end
