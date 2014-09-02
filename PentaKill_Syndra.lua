@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.27
+local version = 1.28
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -49,7 +49,8 @@ local QECombo = 0
 local DontUseRTime = 0
 local UseRTime = 0
 
-local MainCombo = {ItemManager:GetItem("DFG"):GetId(), _W, _E, _R, _R, _R, _IGNITE}
+--local MainCombo = {ItemManager:GetItem("DFG"):GetId(), _W, _E, _R, _R, _R, _IGNITE}
+local MainCombo = {_W, _E, _R, _R, _R, _IGNITE}
 
 function OnLoad()	
 	VP = VPrediction()
@@ -166,9 +167,9 @@ function GetCombo(target)
 	if target ~= nil then
 		local result = {}
 		for i, spell in ipairs(MainCombo) do
-			if (spell == ItemManager:GetItem("DFG"):GetId()) and GetDistanceSqr(target.visionPos, myHero.visionPos) < math.pow(650, 2) then 
-				table.insert(result, spell)
-			elseif (spell == _IGNITE) and GetDistanceSqr(target.visionPos, myHero.visionPos) < math.pow(600, 2) then
+			--if (spell == ItemManager:GetItem("DFG"):GetId()) and GetDistanceSqr(target.visionPos, myHero.visionPos) < math.pow(650, 2) then 
+				--table.insert(result, spell)
+			if (spell == _IGNITE) and GetDistanceSqr(target.visionPos, myHero.visionPos) < math.pow(600, 2) then
 				table.insert(result, spell)
 			else
 				table.insert(result, spell)
@@ -643,13 +644,13 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR, forcedtarget)
 	if UseR and not Q.IsReady() and not W.IsReady() then
 		if ((Qtarget and not Menu.R.Targets[Qtarget.hash]) or (Rtarget and not Menu.R.Targets[Rtarget.hash])) then
 			if Qtarget and ((GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Qtarget, GetCombo(Qtarget)) and (not Menu.Combo.AntiOverKill or not DLib:IsKillable(Qtarget, {_AQ})) and not DLib:IsKillable(Qtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
-				ItemManager:CastOffensiveItems(Qtarget)
+				--ItemManager:CastOffensiveItems(Qtarget)
 				if _IGNITE and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < 600 * 600 then
 					CastSpell(_IGNITE, Qtarget)
 				end
 				CastSpell(_R, Qtarget)
 			elseif Rtarget and ((GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Rtarget, GetCombo(Rtarget)) and (not Menu.Combo.AntiOverKill or not DLib:IsKillable(Rtarget, {_AQ})) and not DLib:IsKillable(Rtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
-				ItemManager:CastOffensiveItems(Rtarget)
+				--ItemManager:CastOffensiveItems(Rtarget)
 				if _IGNITE and GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < 600 * 600 then
 					CastSpell(_IGNITE, Rtarget)
 				end
