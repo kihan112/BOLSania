@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.29
+local version = 1.30
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -49,15 +49,15 @@ local QECombo = 0
 local DontUseRTime = 0
 local UseRTime = 0
 
---local MainCombo = {ItemManager:GetItem("DFG"):GetId(), _W, _E, _R, _R, _R, _IGNITE}
-_IGNITE  = GetSummonerSlot("summonerdot")
-local MainCombo = {_W, _E, _R, _R, _R, _IGNITE}
+_SpellIGNITE  = GetSummonerSlot("summonerdot")
+local MainCombo = {_W, _E, _R, _R, _R, _SpellIGNITE}
 
 function OnLoad()	
 	VP = VPrediction()
 	DLib = DamageLib()
 	DManager = DrawManager()
 
+	self:RegisterDamageSource(_SpellIGNITE, _TRUE, 0, 0, _TRUE, _AP, 0, function() return _SpellIGNITE and (player:CanUseSpell(_SpellIGNITE) == READY) end, function() return (50 + 20 * self.source.level) end)
 	DLib:RegisterDamageSource(_AQ, _MAGIC, 30, 40, _MAGIC, _AP, 0.60, function() return true end)--Without the 15% increase at rank 5
 	DLib:RegisterDamageSource(_Q, _MAGIC, 30, 40, _MAGIC, _AP, 0.60, function() return (player:CanUseSpell(_Q) == READY) end)--Without the 15% increase at rank 5
 	DLib:RegisterDamageSource(_LV5Q, _MAGIC, 264.5, 0, _MAGIC, _AP, 0.69, function() return (player:CanUseSpell(_Q) == READY) end)--With the 15% increase at rank 5
@@ -168,7 +168,7 @@ function GetCombo(target)
 		for i, spell in ipairs(MainCombo) do
 			--if (spell == ItemManager:GetItem("DFG"):GetId()) and GetDistanceSqr(target.visionPos, myHero.visionPos) < math.pow(650, 2) then 
 				--table.insert(result, spell)
-			if (spell == _IGNITE) and GetDistanceSqr(target.visionPos, myHero.visionPos) < math.pow(600, 2) then
+			if (spell == _SpellIGNITE) and GetDistanceSqr(target.visionPos, myHero.visionPos) < math.pow(600, 2) then
 				table.insert(result, spell)
 			else
 				table.insert(result, spell)
@@ -433,7 +433,7 @@ function OnRecvPacket(p)
 		local NetworkID = p:DecodeF()
 		local Active = p:Decode1()
 
-		if NetworkID and Active == 1 then
+		if NetworkID and (Active == 1 or Active == 179 or Active == 217 or Active == 223 or Active == 185) then
 			if not WObject then
 				for i, ball in ipairs(Balls) do
 					if ball.networkID == NetworkID then
@@ -698,14 +698,14 @@ function UseSpells(UseQ, UseW, UseE, UseEQ, UseR, forcedtarget)
 		if ((Qtarget and not Menu.R.Targets[Qtarget.hash]) or (Rtarget and not Menu.R.Targets[Rtarget.hash])) then
 			if Qtarget and ((GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Qtarget, GetCombo(Qtarget)) and (not Menu.Combo.AntiOverKill or not DLib:IsKillable(Qtarget, {_AQ})) and not DLib:IsKillable(Qtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
 				--ItemManager:CastOffensiveItems(Qtarget)
-				if _IGNITE and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < 600 * 600 then
-					CastSpell(_IGNITE, Qtarget)
+				if _SpellIGNITE and GetDistanceSqr(Qtarget.visionPos, myHero.visionPos) < 600 * 600 then
+					CastSpell(_SpellIGNITE, Qtarget)
 				end
 				CastSpell(_R, Qtarget)
 			elseif Rtarget and ((GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < R.rangeSqr and DLib:IsKillable(Rtarget, GetCombo(Rtarget)) and (not Menu.Combo.AntiOverKill or not DLib:IsKillable(Rtarget, {_AQ})) and not DLib:IsKillable(Rtarget, {_Q, _W})) or (os.clock() - UseRTime < 10)) then
 				--ItemManager:CastOffensiveItems(Rtarget)
-				if _IGNITE and GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < 600 * 600 then
-					CastSpell(_IGNITE, Rtarget)
+				if _SpellIGNITE and GetDistanceSqr(Rtarget.visionPos, myHero.visionPos) < 600 * 600 then
+					CastSpell(_SpellIGNITE, Rtarget)
 				end
 				CastSpell(_R, Rtarget)
 			end
