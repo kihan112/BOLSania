@@ -1,6 +1,6 @@
 if myHero.charName ~= "Syndra" then return end
 
-local version = 1.30
+local version = 1.31
 local AUTOUPDATE = true
 local SCRIPT_NAME = "PentaKill_Syndra"
 local ForceUseSimpleTS = false
@@ -57,7 +57,7 @@ function OnLoad()
 	DLib = DamageLib()
 	DManager = DrawManager()
 
-	self:RegisterDamageSource(_SpellIGNITE, _TRUE, 0, 0, _TRUE, _AP, 0, function() return _SpellIGNITE and (player:CanUseSpell(_SpellIGNITE) == READY) end, function() return (50 + 20 * self.source.level) end)
+	DLib:RegisterDamageSource(_SpellIGNITE, _TRUE, 0, 0, _TRUE, _AP, 0, function() return _SpellIGNITE and (player:CanUseSpell(_SpellIGNITE) == READY) end, function() return (50 + 20 * player.level) end)
 	DLib:RegisterDamageSource(_AQ, _MAGIC, 30, 40, _MAGIC, _AP, 0.60, function() return true end)--Without the 15% increase at rank 5
 	DLib:RegisterDamageSource(_Q, _MAGIC, 30, 40, _MAGIC, _AP, 0.60, function() return (player:CanUseSpell(_Q) == READY) end)--Without the 15% increase at rank 5
 	DLib:RegisterDamageSource(_LV5Q, _MAGIC, 264.5, 0, _MAGIC, _AP, 0.69, function() return (player:CanUseSpell(_Q) == READY) end)--With the 15% increase at rank 5
