@@ -433,7 +433,7 @@ function OnRecvPacket(p)
 		local NetworkID = p:DecodeF()
 		local Active = p:Decode1()
 
-		if NetworkID and (Active == 1 or Active == 179 or Active == 217 or Active == 223 or Active == 185 or Active == 186 or Active == 183 or Active == 187  or Active == 184 or Active == 181 or Active == 182 or Active == 225 or Active == 219) then
+		if NetworkID and (Active == 1 or Active == 179 or Active == 217 or Active == 223 or Active == 185 or Active == 186 or Active == 183 or Active == 187  or Active == 184 or Active == 181 or Active == 182 or Active == 225 or Active == 219 or Active == 188 or Active == 225 ) then
 			if not WObject then
 				for i, ball in ipairs(Balls) do
 					if ball.networkID == NetworkID then
